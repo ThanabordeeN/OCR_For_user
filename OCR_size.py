@@ -4,6 +4,7 @@ from PyQt5.QtGui import QPixmap, QImage
 from ui import Ui_MainWindow
 from pathlib import Path
 import sys
+import pandas as pd
 import cv2
 import pytesseract
 from PIL import Image
@@ -17,6 +18,8 @@ MainWindow = QtWidgets.QMainWindow()
 
 class myapp(Ui_MainWindow):
     def __init__(self) -> None:
+        self.thai_alphabet = "กขคฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮะอาอิอีอึอือุอูเอะเอแอะแอโอะโอเอาะใอไอเอา"
+        self.eng_alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
         super().setupUi(MainWindow)
         self.file = None
         self.setupSignal()
@@ -61,8 +64,7 @@ class myapp(Ui_MainWindow):
 
     def ocr(self):
         try :
-            self.result.setText(pytesseract.image_to_string(Image.open(self.file[0]), lang=self.dropdown.currentText()))
-            self.ocrbox(self.resized_frame)
+            self.ocrbox(self.frame)
         except :
             self.result.setText("No file selected")
 
@@ -71,19 +73,48 @@ class myapp(Ui_MainWindow):
                 
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
-            data = pytesseract.image_to_data(gray, output_type=pytesseract.Output.DICT , lang=self.dropdown.currentText())
+            
+            #data = pytesseract.image_to_data(thresh, output_type=pytesseract.Output.DICT , lang=self.dropdown.currentText())
+            data = pytesseract.image_to_data(thresh, output_type=pytesseract.Output.DICT , lang=self.dropdown.currentText())
+            # Remove empty strings from the list
             n_box = len(data['text'])
             text = ""
             for i in range(n_box):
-                if int(float(data['conf'][i])) > 70:
+                if int(float(data['conf'][i])) > 80:
                     try:
+                        if len(data['text'][i]) == 1 and data['text'][i] in self.thai_alphabet:
+                            if data['text'][i] in self.thai_alphabet:
+                                text += data['text'][i]
+                                print(data['text'][i])
+                            elif all(char in self.eng_alphabet for char in data['text'][i]):
+                                text += data['text'][i] + " "
+                                print(data['text'][i])
+                            elif data['text'][i] == ' ':
+                                pass
+                                print(data['text'][i])
+                            elif all(char in self.thai_alphabet for char in data['text'][i]) and all(char in self.eng_alphabet for char in data['text'][i+1]):
+                                text += data['text'][i] + " "
+                                print(data['text'][i])
+                        elif len(data['text'][i]) > 1:
+                            if all(char in self.eng_alphabet for char in data['text'][i]):
+                                text += data['text'][i] + " "
+                                print(data['text'][i])
+                            elif all(char in self.thai_alphabet for char in data['text'][i]) and all(char in self.eng_alphabet for char in data['text'][i+1]):
+                                text += data['text'][i] + " "
+                                print(data['text'][i])
+                            else:
+                                print(data['text'][i])
+                                text += data['text'][i]
+
+
                         if data['text'][i] == self.inputtext:
                             (x, y, w, h) = (data['left'][i], data['top'][i], data['width'][i], data['height'][i])
                             cv2.rectangle(self.resized_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
                     except:
                         pass
-                text += data['text'][i] + ' '
+
             self.display_image(self.resized_frame)
+            print(text)
             self.result.setText(text)
         except :
             self.result.setText("No file selected")

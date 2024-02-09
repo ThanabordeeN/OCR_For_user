@@ -48,7 +48,7 @@ class Ui_MainWindow(object):
         self.dropdown = QtWidgets.QComboBox(self.centralwidget)
         self.dropdown.setGeometry(QtCore.QRect(10, 660, 91, 41))
         self.dropdown.setObjectName("Language")
-        self.dropdown.addItem("Thai")
+        self.dropdown.addItem("tha")
         self.dropdown.addItem("eng")
         self.dropdown.addItem("jpn")
         self.dropdown.addItem("eng+tha")
