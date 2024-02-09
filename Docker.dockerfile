@@ -13,7 +13,7 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 
 # Copy your application source code into the Docker image
-COPY . /app                                                                                                                                                                 
+COPY . .                                                                                                                                    
 
 # Expose any ports if needed by your app
 EXPOSE 8080  
