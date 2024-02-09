@@ -33,10 +33,10 @@ This PyQt5 application provides image processing tools, OCR (Optical Character R
 
 **Usage**
 
-1.  Run the application (assuming your main Python file is `main.py`):
+1.  Run the application (assuming your main Python file is `OCR_size.py`):
 
     ```bash
-    python main.py 
+    python OCR_size.py 
     ```
 
 2.  **Select an image:** Click the "Choose Image" button to select an image or PDF file.
