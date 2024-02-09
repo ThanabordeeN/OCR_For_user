@@ -18,10 +18,11 @@ MainWindow = QtWidgets.QMainWindow()
 class myapp(Ui_MainWindow):
     def __init__(self) -> None:
         super().setupUi(MainWindow)
-        self.setupSignal()
         self.file = None
+        self.setupSignal()
         self.confirm_bt.clicked.connect(self.get)
         self.ocr_bt.clicked.connect(self.ocr)
+        self.dropdown.setCurrentIndex(0)  # Set default language to THA
 
     def get(self):
         self.inputtext = self.textselected.text()
@@ -29,56 +30,63 @@ class myapp(Ui_MainWindow):
 
     def setupSignal(self):
         self.input_bt.clicked.connect(self.selectInput)
-
+        self.dropdown.currentIndexChanged['QString'].connect(self.ocr)  # Update your OCR function
+        
     def selectInput(self):
-        # Pop up for selecting files
-        self.file = QFileDialog.getOpenFileName(caption="Choose image", filter="Image files (*.jpg *.png *.jpeg *.pdf)", directory='/home/cepheusn22/home/')
-        print(self.file[0])
         try:
-            if self.file[0][-4:] == ".pdf":
-                # Convert PDF to images
-                images = convert_from_path(self.file[0])
+            # Pop up for selecting files
+            self.file = QFileDialog.getOpenFileName(caption="Choose image", filter="Image files (*.jpg *.png *.jpeg *.pdf)", directory='/home/cepheusn22/home/')
+            try:
+                if self.file[0][-4:] == ".pdf":
+                    # Convert PDF to images
+                    images = convert_from_path(self.file[0])
 
-                # Save each image as JPEG
-                for i, image in enumerate(images):
-                    image_path = os.path.splitext(self.file[0])[0] + f"_{i}.jpg"
-                    image.save(image_path, "JPEG")
-                    print(f"Image {i} saved as {image_path}")
-                    # Process the image or perform OCR on the saved image
-                    self.frame = cv2.imread(image_path)
+                    # Save each image as JPEG
+                    for i, image in enumerate(images):
+                        image_path = os.path.splitext(self.file[0])[0] + f"_{i}.jpg"
+                        image.save(image_path, "JPEG")
+                        # Process the image or perform OCR on the saved image
+                        self.frame = cv2.imread(image_path)
+                        self.resized_frame = cv2.resize(self.frame, (800, 590))
+                        self.display_image(self.resized_frame)
+                        self.file = [image_path]
+                else:
+                    self.frame = cv2.imread(self.file[0])  # index 0 is directory
                     self.resized_frame = cv2.resize(self.frame, (800, 590))
                     self.display_image(self.resized_frame)
-                    self.file = [image_path]
-            else:
-                self.frame = cv2.imread(self.file[0])  # index 0 is directory
-                self.resized_frame = cv2.resize(self.frame, (800, 590))
-                self.display_image(self.resized_frame)
+            except:
+                pass
         except:
-            pass
+            print("Invalid file")
 
     def ocr(self):
-        print(self.file[0])
-        self.result.setText(pytesseract.image_to_string(Image.open(self.file[0])))
-        self.ocrbox(self.resized_frame)
+        try :
+            self.result.setText(pytesseract.image_to_string(Image.open(self.file[0]), lang=self.dropdown.currentText()))
+            self.ocrbox(self.resized_frame)
+        except :
+            self.result.setText("No file selected")
 
     def ocrbox(self, image):
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
-        data = pytesseract.image_to_data(gray, output_type=pytesseract.Output.DICT)
-        n_box = len(data['text'])
-        print(data.keys())
-        text = ""
-        for i in range(n_box):
-            if int(float(data['conf'][i])) > 70:
-                try:
-                    if data['text'][i] == self.inputtext:
-                        (x, y, w, h) = (data['left'][i], data['top'][i], data['width'][i], data['height'][i])
-                        cv2.rectangle(self.resized_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-                except:
-                    pass
-            text += data['text'][i] + ' '
-        self.display_image(self.resized_frame)
-        self.result.setText(text)
+        try :
+                
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
+            data = pytesseract.image_to_data(gray, output_type=pytesseract.Output.DICT , lang=self.dropdown.currentText())
+            n_box = len(data['text'])
+            text = ""
+            for i in range(n_box):
+                if int(float(data['conf'][i])) > 70:
+                    try:
+                        if data['text'][i] == self.inputtext:
+                            (x, y, w, h) = (data['left'][i], data['top'][i], data['width'][i], data['height'][i])
+                            cv2.rectangle(self.resized_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                    except:
+                        pass
+                text += data['text'][i] + ' '
+            self.display_image(self.resized_frame)
+            self.result.setText(text)
+        except :
+            self.result.setText("No file selected")
 
     def display_image(self, image):
         h, w, c = image.shape

@@ -43,6 +43,16 @@ class Ui_MainWindow(object):
         self.confirm_bt = QtWidgets.QPushButton(self.centralwidget)
         self.confirm_bt.setGeometry(QtCore.QRect(740, 650, 91, 41))
         self.confirm_bt.setObjectName("confirm_bt")
+        
+        # Create the dropdown
+        self.dropdown = QtWidgets.QComboBox(self.centralwidget)
+        self.dropdown.setGeometry(QtCore.QRect(10, 660, 91, 41))
+        self.dropdown.setObjectName("Language")
+        self.dropdown.addItem("Thai")
+        self.dropdown.addItem("eng")
+        self.dropdown.addItem("jpn")
+        self.dropdown.addItem("eng+tha")
+        
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 916, 26))
