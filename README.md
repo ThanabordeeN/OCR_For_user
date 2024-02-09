@@ -60,6 +60,8 @@ This PyQt5 application provides image processing tools, OCR (Optical Character R
 *   Ensure the Tesseract OCR executable is in the correct path or modify the `pytesseract.pytesseract.tesseract_cmd` line in your code.
 
 
+**Let me know if you have more specifics about how you want the Dockerized version of your app to function, and I'll refine the Dockerfile further!**
+
 
 **Contact**
 
