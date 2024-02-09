@@ -81,32 +81,21 @@ class myapp(Ui_MainWindow):
             text = ""
             for i in range(n_box):
                 if int(float(data['conf'][i])) > 80:
+                    if len(data['text'][i]) == 1:
+                        if data['text'][i] in self.thai_alphabet:
+                            text += data['text'][i]
+                        elif all(char in self.eng_alphabet for char in data['text'][i]):
+                            text += data['text'][i] + " "
+                        elif data['text'][i] == ' ':
+                            pass
+                    elif len(data['text'][i]) > 1:
+                        if all(char in self.eng_alphabet for char in data['text'][i]):
+                            text += data['text'][i] + " "
+                        elif all(char in self.thai_alphabet for char in data['text'][i]) and all(char in self.eng_alphabet for char in data['text'][i+1]):
+                            text += data['text'][i] + " "
+                        else:
+                            text += data['text'][i]
                     try:
-                        if len(data['text'][i]) == 1 and data['text'][i] in self.thai_alphabet:
-                            if data['text'][i] in self.thai_alphabet:
-                                text += data['text'][i]
-                                print(data['text'][i])
-                            elif all(char in self.eng_alphabet for char in data['text'][i]):
-                                text += data['text'][i] + " "
-                                print(data['text'][i])
-                            elif data['text'][i] == ' ':
-                                pass
-                                print(data['text'][i])
-                            elif all(char in self.thai_alphabet for char in data['text'][i]) and all(char in self.eng_alphabet for char in data['text'][i+1]):
-                                text += data['text'][i] + " "
-                                print(data['text'][i])
-                        elif len(data['text'][i]) > 1:
-                            if all(char in self.eng_alphabet for char in data['text'][i]):
-                                text += data['text'][i] + " "
-                                print(data['text'][i])
-                            elif all(char in self.thai_alphabet for char in data['text'][i]) and all(char in self.eng_alphabet for char in data['text'][i+1]):
-                                text += data['text'][i] + " "
-                                print(data['text'][i])
-                            else:
-                                print(data['text'][i])
-                                text += data['text'][i]
-
-
                         if data['text'][i] == self.inputtext:
                             (x, y, w, h) = (data['left'][i], data['top'][i], data['width'][i], data['height'][i])
                             cv2.rectangle(self.resized_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
