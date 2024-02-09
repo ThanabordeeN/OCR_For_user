@@ -93,7 +93,9 @@ class myapp(Ui_MainWindow):
                             text += data['text'][i] + " "
                         elif all(char in self.thai_alphabet for char in data['text'][i]) and all(char in self.eng_alphabet for char in data['text'][i+1]):
                             text += data['text'][i] + " "
+                            print(data['text'][i])
                         else:
+                            print(data['text'][i])
                             text += data['text'][i]
                     try:
                         if data['text'][i] == self.inputtext:
